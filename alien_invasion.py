@@ -7,7 +7,9 @@ class AlienInvasion():
 		pygame.init()
 		self.setts=Settings()
 		self.screen=pygame.display.set_mode(
-			(self.setts.screen_width,self.setts.screen_height))
+			(0,0),pygame.FULLSCREEN)
+		self.setts.screen_width=self.screen.get_rect().width
+		self.setts.screen_height=self.screen.get_rect().height
 		pygame.display.set_caption("Alien Invasion")
 		self.ship=Ship(self)
 	def run_game(self):
@@ -21,15 +23,21 @@ class AlienInvasion():
 			if event.type==pygame.QUIT:
 				sys.exit()
 			elif event.type==pygame.KEYDOWN:
-				if event.key==pygame.K_RIGHT:
-					self.ship.moving_r=True
-				if event.key==pygame.K_LEFT:
-					self.ship.moving_l=True
+				self._check_keydown_events(event)
 			elif event.type==pygame.KEYUP:
-				if event.key==pygame.K_RIGHT:
-					self.ship.moving_r=False
-				if event.key==pygame.K_LEFT:
-					self.ship.moving_l=False
+				self._check_keyup_events(event)
+	def _check_keydown_events(self,event):
+		if event.key==pygame.K_RIGHT:
+			self.ship.moving_r=True
+		if event.key==pygame.K_LEFT:
+			self.ship.moving_l=True
+		if event.key==pygame.K_q:
+			sys.exit()
+	def _check_keyup_events(self,event):
+		if event.key==pygame.K_RIGHT:
+			self.ship.moving_r=False
+		if event.key==pygame.K_LEFT:
+			self.ship.moving_l=False
 	def _update_screen(self):	
 		self.screen.fill(self.setts.bg_color)
 		self.ship.blitme()
