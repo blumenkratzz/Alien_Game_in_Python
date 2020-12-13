@@ -11,7 +11,7 @@ class Bullet(Sprite):
 			0,0,self.setts.bullet_width,self.setts.bullet_height)
 		self.rect.midtop=ai_game.ship.rect.midtop
 		self.y=float(self.rect.y)
-	def update(self):
+	def update(self): 
 		self.y-=self.setts.bullet_speed
 		self.rect.y=self.y
 	def draw_bullet(self):
