@@ -6,3 +6,5 @@ class GameStats():
 		self.game_active=False
 	def reset_stats(self):
 		self.ships_left=self.setts.ship_limit
+		self.setts.initialize_dynamic_settings()
+		self.score=0
