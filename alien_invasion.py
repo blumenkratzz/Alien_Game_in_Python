@@ -1,4 +1,5 @@
 import sys
+import json
 import pygame
 from time import sleep
 from settings import Settings
@@ -53,6 +54,8 @@ class AlienInvasion():
 			self._create_fleet()
 			self.ship.center_ship()
 			pygame.mouse.set_visible(False)
+			self.sb.prep_level()
+			self.sb.prep_ships()
 
 	def _check_keydown_events(self,event):
 		if event.key==pygame.K_RIGHT:
@@ -60,11 +63,20 @@ class AlienInvasion():
 		if event.key==pygame.K_LEFT:
 			self.ship.moving_l=True
 		if event.key==pygame.K_q:
+			self._write_record(self.stats.high_score)
 			sys.exit()
 		if event.key==pygame.K_SPACE and self.stats.game_active:
 			self._fire_bullet()
 		if event.key==pygame.K_s:
-			self.stats.ships_left-=1
+			if self.stats.game_active:
+				if self.stats.ships_left>0:
+					self.stats.ships_left-=1
+					self.sb.prep_ships()
+			if self.stats.ships_left==0:
+				self.stats.game_active=False
+				self.stats.reset_stats()
+				self.sb.prep_score()
+				pygame.mouse.set_visible(True)
 	def _check_keyup_events(self,event):
 		if event.key==pygame.K_RIGHT:
 			self.ship.moving_r=False
@@ -101,9 +113,16 @@ class AlienInvasion():
 	def _check_bullet_alien_collisions(self):
 		collisions=pygame.sprite.groupcollide(
 			self.bull,self.aliens,True,True)
+		if collisions:
+			for al in collisions.values():
+				self.stats.score+=self.setts.alien_points*len(al)
+			self.sb.prep_score()
+			self.sb.check_high_score()
 		if not self.aliens:
 			self.bull.empty()
 			self.setts.increase_speed()
+			self.stats.level+=1
+			self.sb.prep_level()
 			self._create_fleet()
 	def _update_aliens(self):
 		self._check_fleet_edges()
@@ -115,13 +134,16 @@ class AlienInvasion():
 	def _ship_hit(self):
 		if self.stats.ships_left > 0:
 			self.stats.ships_left-=1
+			self.sb.prep_ships()
 			self.aliens.empty()
 			self.bull.empty()
 			self._create_fleet()
 			self.ship.center_ship()
 			sleep(1)
-		else:
+		if self.stats.ships_left==0:
 			self.stats.game_active=False
+			self.stats.reset_stats()
+			self.sb.prep_score()
 			pygame.mouse.set_visible(True)
 	def _create_fleet(self):
 		new_alien=Alien(self)
@@ -146,6 +168,11 @@ class AlienInvasion():
 		new_alien.rect.y=(new_alien.rect.height+
 			2*new_alien.rect.height*row_number)
 		self.aliens.add(new_alien)
+	def _write_record(self,record):
+		filename=self.setts.record_filename
+		f=open(filename,'w')
+		json.dump(record,f)
+		f.close()
 	def _update_screen(self):	
 		self.screen.fill(self.setts.bg_color)
 		self.ship.blitme()
