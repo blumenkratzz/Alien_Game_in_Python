@@ -19,6 +19,15 @@ class AlienInvasion():
 		self.setts.screen_height=self.screen.get_rect().height
 		pygame.display.set_caption("Alien Invasion")
 		self.play_button=Button(self,"Play")
+		pygame.mixer.music.load('music/background_XX_intro.mp3')
+		pygame.mixer.music.play(-1)
+		self.sound_ship_attack=pygame.mixer.Sound('music/ship_attack.mp3')
+		self.sound_ship_attack.set_volume(0.2)
+		self.sound_level_success=pygame.mixer.Sound('music/new_level.mp3')
+		self.sound_level_failure=pygame.mixer.Sound('music/failure_level.mp3')
+		self.sound_level_failure.set_volume(0.6)
+		self.sound_alien_ship=pygame.mixer.Sound('music/alien_ship_collision.mp3')
+		self.sound_alien_ship.set_volume(0.3)
 		self.stats=GameStats(self)
 		self.sb=Scoreboard(self)
 		self.ship=Ship(self)
@@ -66,7 +75,15 @@ class AlienInvasion():
 			self._write_record(self.stats.high_score)
 			sys.exit()
 		if event.key==pygame.K_SPACE and self.stats.game_active:
+			self.sound_ship_attack.play()
 			self._fire_bullet()
+		if event.key==pygame.K_1:
+			pygame.mixer.music.pause()
+		if event.key==pygame.K_2:
+			pygame.mixer.music.set_volume(pygame.mixer.music.get_volume()*0.5)
+		if event.key==pygame.K_3:
+			pygame.mixer.music.unpause()
+			pygame.mixer.music.set_volume(1)
 		if event.key==pygame.K_s:
 			if self.stats.game_active:
 				if self.stats.ships_left>0:
@@ -74,6 +91,7 @@ class AlienInvasion():
 					self.sb.prep_ships()
 			if self.stats.ships_left==0:
 				self.stats.game_active=False
+				self.sound_level_failure.play()
 				self.stats.reset_stats()
 				self.sb.prep_score()
 				pygame.mouse.set_visible(True)
@@ -121,6 +139,7 @@ class AlienInvasion():
 		if not self.aliens:
 			self.bull.empty()
 			self.setts.increase_speed()
+			self.sound_level_success.play()
 			self.stats.level+=1
 			self.sb.prep_level()
 			self._create_fleet()
@@ -134,6 +153,7 @@ class AlienInvasion():
 	def _ship_hit(self):
 		if self.stats.ships_left > 0:
 			self.stats.ships_left-=1
+			self.sound_alien_ship.play()
 			self.sb.prep_ships()
 			self.aliens.empty()
 			self.bull.empty()
@@ -142,6 +162,7 @@ class AlienInvasion():
 			sleep(1)
 		if self.stats.ships_left==0:
 			self.stats.game_active=False
+			self.sound_level_failure.play()
 			self.stats.reset_stats()
 			self.sb.prep_score()
 			pygame.mouse.set_visible(True)
