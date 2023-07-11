@@ -67,6 +67,11 @@ class AlienInvasion():
 			self.sb.prep_ships()
 
 	def _check_keydown_events(self,event):
+		if event.key==pygame.K_ESCAPE:
+			if self.stats.game_active==False:
+				self.stats.game_active=True
+			else:
+				self.stats.game_active=False
 		if event.key==pygame.K_RIGHT:
 			self.ship.moving_r=True
 		if event.key==pygame.K_LEFT:
